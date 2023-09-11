@@ -1,5 +1,7 @@
 // import React from "react";
 
+import { Link } from "react-router-dom";
+
 export default function Login() {
     return (
         <div className="flex justify-center items-center h-[100svh]">
@@ -26,12 +28,12 @@ export default function Login() {
 
                 <p className="text-sm text-center">
                     Don't have an account?{" "}
-                    <a
+                    <Link
                         className="text-blue-700 hover:underline"
-                        href="/register"
+                        to="/register"
                     >
                         Register
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>

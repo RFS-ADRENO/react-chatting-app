@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useLoginStore } from "../main";
+import { useLoginStore } from "../stores/login.store";
 
 export default function Header() {
     const { loggedIn } = useLoginStore();

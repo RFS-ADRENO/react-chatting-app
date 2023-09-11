@@ -1,45 +1,67 @@
-import Header from "./components/Header";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { useLoginStore } from "./main";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { createWSClient, httpBatchLink, wsLink, splitLink } from "@trpc/client";
+
+import { trpc } from "./trpc.ts";
+
+import Main from "./components/Main.tsx";
+
+import NotFound from "./pages/NotFound.tsx";
+
+import Home from "./pages/Home.tsx";
+import Chat from "./pages/Chat.tsx";
+import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
+
+// import { useLoginStore } from "./stores/login.store.ts";
 
 function App() {
-    const { loggedIn } = useLoginStore();
+    const [queryClient] = useState(() => new QueryClient());
+    const [trpcClient] = useState(() =>
+        trpc.createClient({
+            links: [
+                splitLink({
+                    condition: (op) => {
+                        return op.type === "subscription";
+                    },
+                    true: wsLink({
+                        client: createWSClient({
+                            url: import.meta.env.VITE_WS_URL as string,
+                        }),
+                    }),
+                    false: httpBatchLink({
+                        url: import.meta.env.VITE_API_URL as string,
+                    }),
+                }),
+                // wsLink({
+                //         client: createWSClient({
+                //             url: import.meta.env.VITE_WS_URL as string,
+                //         }),
+                //     }),
+            ],
+        })
+    );
+    // const { loggedIn } = useLoginStore();
+
     return (
-        <>
-            <Header />
-            <section className="h-[720px] p-2 md:p-10 xl:px-64">
-                <p className="text-4xl">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Rerum a ut deleniti cupiditate itaque facilis animi cum
-                    dolores molestiae ad minus rem obcaecati, odio pariatur enim
-                    sequi delectus? Ipsum, sunt!
-                </p>
-                <br />
-                <a
-                    className="text-2xl font-semibold text-blue-700 hover:underline"
-                    href={loggedIn ? "/chat" : "/login"}
-                >
-                    {loggedIn ? "Start chatting" : "Login"}
-                </a>
-                <br />
-                <br />
-                <button
-                    className="text-2xl font-semibold text-red-700 hover:underline"
-                    onClick={() => {
-                        let token = localStorage.getItem("token");
-                        if (token) {
-                            localStorage.removeItem("token");
-                            window.location.reload();
-                        } else {
-                            localStorage.setItem("token", "token");
-                            window.location.reload();
-                        }
-                    }}
-                >
-                    Add/Remove token
-                </button>
-            </section>
-        </>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    <Main>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/chat" element={<Chat />} />
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </Main>
+                </BrowserRouter>
+            </QueryClientProvider>
+        </trpc.Provider>
     );
 }
 

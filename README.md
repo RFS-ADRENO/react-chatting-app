@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a simple chat application built with Typescript, React, Node.js, Express and Socket.io.
+This is a simple chat application built use NodeJS with Typescript, React, Express, Websocket and tRPC.
 
 ## Installation
 
@@ -43,7 +43,7 @@ This project was built by [RFS-ADRENO](https://github.com/RFS-ADRENO)
 -   [Typescript](https://www.typescriptlang.org/)
 -   [SASS](https://sass-lang.com/)
 -   [TailwindCSS](https://tailwindcss.com/)
--   [Socket.io-client](https://socket.io/docs/v4/client-api/)
+-   [tRPC](https://trpc.io/docs/client/react)
 -   ...
 
 ### Server
@@ -53,7 +53,8 @@ This project was built by [RFS-ADRENO](https://github.com/RFS-ADRENO)
 -   [Typescript](https://www.typescriptlang.org/)
 -   [Prisma](https://www.prisma.io/)
 -   [SQLite](https://www.sqlite.org/index.html)
--   [Socket.io](https://socket.io/docs/v4/server-api/)
+-   [tRPC](https://trpc.io/docs/server/introduction)
+-   [WS](https://github.com/websockets/ws/blob/HEAD/doc/ws.md)
 -   ...
 
 ## License

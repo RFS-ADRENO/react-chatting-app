@@ -1,30 +1,82 @@
-import http from "http";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import { Server } from "socket.io";
+import {
+    router,
+    publicProcedureHTTP,
+    publicProcedureWS,
+    createContext,
+} from "./trpc.js";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { applyWSSHandler } from "@trpc/server/adapters/ws";
+import { observable } from "@trpc/server/observable";
+
+import { WebSocketServer } from "ws";
+import { EventEmitter } from "events";
+
+const ee = new EventEmitter();
 
 const app = express();
-const server = http.createServer(app);
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-const io = new Server(server);
-
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-io.on("connection", (socket) => {
-    console.log("a user connected");
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-    });
+const appRouter = router({
+    home: publicProcedureHTTP.query(({ ctx }) => {
+        return "Hello World!";
+    }),
+    chat: publicProcedureWS.subscription(() => {
+        return observable<string>((emit) => {
+            ee.on("chat", (message) => {
+                emit.next(message);
+            });
+
+            return () => {
+                ee.off("chat", (message) => {
+                    emit.next(message);
+                });
+            };
+        });
+    }),
+    submit: publicProcedureHTTP.mutation(async ({ ctx }) => {
+        await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(void 0);
+            }, 2000);
+        });
+
+        return "Hello World!";
+    }),
 });
 
-server.listen(3000, () => {
+app.use("/trpc", createExpressMiddleware({ router: appRouter, createContext }));
+
+const server = app.listen(3000, () => {
     console.log("listening on *:3000");
 });
+
+// const io = new Server(server, {
+//     cors: {
+//         origin: "*",
+//         methods: ["GET", "POST"],
+//     },
+// });
+
+applyWSSHandler({
+    wss: new WebSocketServer({ server }),
+    router: appRouter,
+    createContext: ({ req, res }) => {
+        return {
+            req,
+            res,
+        };
+    },
+});
+
+export type AppRouter = typeof appRouter;

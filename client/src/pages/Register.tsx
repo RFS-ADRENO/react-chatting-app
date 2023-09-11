@@ -1,5 +1,7 @@
 // import React from "react";
 
+import { Link } from "react-router-dom";
+
 export default function Register() {
     return (
         <div className="flex justify-center items-center h-[100svh]">
@@ -31,9 +33,9 @@ export default function Register() {
 
                 <p className="text-sm text-center">
                     Already have an account?{" "}
-                    <a className="text-blue-700 hover:underline" href="/login">
+                    <Link className="text-blue-700 hover:underline" to="/login">
                         Login
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>

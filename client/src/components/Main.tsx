@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLoginStore } from "../main";
+import { useLoginStore } from "../stores/login.store";
 
 interface Props {
     children: React.ReactNode;
