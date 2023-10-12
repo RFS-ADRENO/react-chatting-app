@@ -2,11 +2,10 @@
 import { create } from "zustand";
 
 interface ILoginStore {
-    loggedIn: boolean;
+    loggedIn?: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
 }
 
 export const useLoginStore = create<ILoginStore>()((set) => ({
-    loggedIn: false,
     setLoggedIn: (loggedIn: boolean) => set({ loggedIn }),
 }));

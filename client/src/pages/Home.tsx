@@ -40,12 +40,12 @@ function App() {
                 <button
                     className="text-2xl font-semibold text-red-700 hover:underline"
                     onClick={() => {
-                        let token = localStorage.getItem("token");
-                        if (token) {
-                            localStorage.removeItem("token");
+                        let login = localStorage.getItem("login");
+                        if (login == "true") {
+                            localStorage.removeItem("login");
                             window.location.reload();
                         } else {
-                            localStorage.setItem("token", "token");
+                            localStorage.setItem("login", "true");
                             window.location.reload();
                         }
                     }}

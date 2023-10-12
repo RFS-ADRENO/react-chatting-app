@@ -7,6 +7,8 @@ import {
     publicProcedureHTTP,
     publicProcedureWS,
     createContext,
+    protectedProcedureHTTP,
+    protectedProcedureWS,
 } from "./trpc.js";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
@@ -15,11 +17,19 @@ import { observable } from "@trpc/server/observable";
 import { WebSocketServer } from "ws";
 import { EventEmitter } from "events";
 
+import { apiRouter } from "./routes/api.js";
+import { prisma } from "./prisma.js";
+
 const ee = new EventEmitter();
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+        origin: "http://localhost:5000",
+        credentials: true,
+    })
+);
 app.use(helmet());
 app.use(express.json());
 
@@ -44,7 +54,7 @@ const appRouter = router({
             };
         });
     }),
-    submit: publicProcedureHTTP.mutation(async ({ ctx }) => {
+    submit: protectedProcedureWS.mutation(async ({ ctx }) => {
         await new Promise((resolve, reject) => {
             setTimeout(() => {
                 resolve(void 0);
@@ -53,20 +63,16 @@ const appRouter = router({
 
         return "Hello World!";
     }),
+    api: apiRouter,
 });
 
 app.use("/trpc", createExpressMiddleware({ router: appRouter, createContext }));
 
-const server = app.listen(3000, () => {
+const server = app.listen(3000, async () => {
+    await prisma.$connect();
+		console.log("connected to mysql");
     console.log("listening on *:3000");
 });
-
-// const io = new Server(server, {
-//     cors: {
-//         origin: "*",
-//         methods: ["GET", "POST"],
-//     },
-// });
 
 applyWSSHandler({
     wss: new WebSocketServer({ server }),

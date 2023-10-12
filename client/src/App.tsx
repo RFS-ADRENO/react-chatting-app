@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ import Chat from "./pages/Chat.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 
-// import { useLoginStore } from "./stores/login.store.ts";
+import { useLoginStore } from "./stores/login.store.ts";
 
 function App() {
     const [queryClient] = useState(() => new QueryClient());
@@ -25,7 +25,7 @@ function App() {
             links: [
                 splitLink({
                     condition: (op) => {
-                        return op.type === "subscription";
+                        return op.path !== "api.auth.login" && op.path !== "api.auth.register" && op.path !== "submit";
                     },
                     true: wsLink({
                         client: createWSClient({
@@ -34,17 +34,23 @@ function App() {
                     }),
                     false: httpBatchLink({
                         url: import.meta.env.VITE_API_URL as string,
+												fetch: (input, opt) => {
+														return fetch(input, {
+																...opt,
+																credentials: "include",
+														});
+												}
                     }),
                 }),
-                // wsLink({
-                //         client: createWSClient({
-                //             url: import.meta.env.VITE_WS_URL as string,
-                //         }),
-                //     }),
             ],
         })
     );
-    // const { loggedIn } = useLoginStore();
+    const { setLoggedIn } = useLoginStore();
+
+    useEffect(() => {
+        const login = localStorage.getItem("login");
+        setLoggedIn(login == "true");
+    }, []);
 
     return (
         <trpc.Provider client={trpcClient} queryClient={queryClient}>

@@ -6,6 +6,36 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Account {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  user     User?
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  account         Account   @relation(fields: [account_id], references: [id])
+  account_id      Int       @unique
+  username        String    @unique
+  profile_picture String
+  Send            Message[] @relation(name: "sender")
+  Receive         Message[] @relation(name: "receiver")
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  sender_id   Int
+  sender      User     @relation(name: "sender", fields: [sender_id], references: [id])
+  receiver_id Int
+  receiver    User     @relation(name: "receiver", fields: [receiver_id], references: [id])
+  content     String?  @db.VarChar(2000)
+  sticker     String?  @db.VarChar(12)
+  read        Boolean  @default(false)
 }

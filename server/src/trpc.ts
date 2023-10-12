@@ -4,6 +4,7 @@ import type { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-
 import type { IncomingMessage } from "http";
 import type ws from "ws";
 import type { Request, Response } from "express";
+import { useVerify } from "./middlewares/useVerify.js";
 
 export const createContext = async ({
     req,
@@ -23,6 +24,7 @@ const t = initTRPC
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
+export const middleware = t.middleware;
 
 export const publicProcedureHTTP = t.procedure.use(({ ctx, next }) => {
     return next({
@@ -32,6 +34,7 @@ export const publicProcedureHTTP = t.procedure.use(({ ctx, next }) => {
         },
     });
 });
+export const protectedProcedureHTTP = publicProcedureHTTP.use(useVerify());
 
 export const publicProcedureWS = t.procedure.use(({ ctx, next }) => {
     return next({
@@ -41,3 +44,4 @@ export const publicProcedureWS = t.procedure.use(({ ctx, next }) => {
         },
     });
 });
+export const protectedProcedureWS = publicProcedureWS.use(useVerify());
